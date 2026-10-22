@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS Pro - Quản lý bán hàng</title>
+<style>
+:root {
+  --primary: #635bff;
+  --bg: #f5f7fc;
+  --text: #20243a;
+  --muted: #81869c;
+  --border: #e9ebf3;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 225px; background: #17182e; color: white;
+  padding: 25px 17px; flex-shrink: 0;
+}
+.logo { font-size: 23px; font-weight: 800; margin: 5px 8px 38px; }
+.logo span { color: #8c85ff; }
+.nav { display: block; padding: 13px 14px; margin: 7px 0;
+  color: #b8bad0; text-decoration: none; border-radius: 10px; }
+.nav.active, .nav:hover { background: #635bff; color: white; }
+.side-note { margin: 45px 8px 0; color: #8d91ac; font-size: 12px; line-height: 1.7; }
+main { flex: 1; min-width: 0; padding: 28px 32px; }
+.topbar { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:25px; }
+h1 { margin:0 0 7px; font-size:27px; }
+.subtitle { color:var(--muted); font-size:14px; }
+.avatar { background:#e7e5ff; color:#5148d8; border-radius:12px; padding:12px 15px; font-weight:700; }
+.stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-bottom:26px; }
+.stat, .panel { background:white; border:1px solid var(--border); border-radius:16px; padding:20px; }
+.stat-label { color:var(--muted); font-size:13px; }
+.stat-value { font-size:25px; font-weight:800; margin-top:12px; }
+.stat-icon { float:right; padding:10px; border-radius:10px; background:#eeedff; }
+.content { display:grid; grid-template-columns:minmax(0,1fr) 325px; gap:20px; align-items:start; }
+.panel-title { font-size:18px; font-weight:750; margin-bottom:17px; }
+.search { width:100%; border:1px solid var(--border); padding:12px 14px; border-radius:10px; margin-bottom:16px; font-size:14px; outline-color:var(--primary); }
+.categories { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+.cat { border:1px solid var(--border); background:white; border-radius:20px; padding:8px 13px; cursor:pointer; }
+.cat.active { background:var(--primary); color:white; border-color:var(--primary); }
+.products { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.product { border:1px solid var(--border); border-radius:13px; padding:14px; min-width:0; }
+.product-icon { height:76px; display:grid; place-items:center; font-size:36px; background:#f4f3ff; border-radius:10px; margin-bottom:12px; }
+.product-name { font-weight:700; margin-bottom:7px; }
+.product-meta { color:var(--muted); font-size:12px; margin-bottom:12px; }
+.product-bottom { display:flex; align-items:center; justify-content:space-between; gap:5px; }
+.price { color:var(--primary); font-weight:800; font-size:14px; }
+.add { background:var(--primary); color:white; border:0; border-radius:8px; padding:8px 11px; cursor:pointer; font-size:17px; }
+.add:disabled { background:#bbb; cursor:not-allowed; }
+.cart-line { display:flex; justify-content:space-between; gap:10px; padding:13px 0; border-bottom:1px solid var(--border); }
+.cart-name { font-size:13px; font-weight:700; }
+.cart-price { color:var(--muted); font-size:12px; margin-top:5px; }
+.qty { display:flex; align-items:center; gap:9px; margin-top:8px; }
+.qty button { width:25px; height:25px; border:1px solid var(--border); background:white; border-radius:6px; cursor:pointer; }
+.line-total { font-size:13px; font-weight:700; white-space:nowrap; }
+.empty { color:var(--muted); text-align:center; padding:25px 0; font-size:13px; }
+.total-row { display:flex; justify-content:space-between; margin:13px 0; font-size:14px; }
+.grand { border-top:1px dashed #d8d9e5; padding-top:18px; font-size:18px; font-weight:800; }
+.checkout { width:100%; background:var(--primary); color:white; border:0; border-radius:11px; padding:14px; font-size:15px; font-weight:700; cursor:pointer; margin-top:10px; }
+.checkout:disabled { opacity:.5; cursor:not-allowed; }
+.small { color:var(--muted); font-size:12px; margin-top:12px; text-align:center; }
+.section-bottom { margin-top:20px; }
+.link { color:var(--primary); text-decoration:none; }
+@media(max-width:1050px) { .content { grid-template-columns:1fr; } .products { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:700px) {
+ .sidebar { width:64px; padding:20px 7px; }
+ .logo { font-size:0; margin:8px 8px 35px; } .logo span { font-size:22px; }
+ .nav { font-size:0; text-align:center; padding:13px 3px; }
+ .nav::first-letter { font-size:18px; }
+ .side-note { display:none; }
+ main { padding:18px 12px; }
+ .stats { grid-template-columns:1fr; gap:9px; }
+ .stat { padding:14px; } .stat-value { font-size:21px; }
+ .products { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ h1 { font-size:22px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">POS <span>PRO.</span></div>
+    <a class="nav active" href="/">▦ &nbsp; Bán hàng</a>
+    <a class="nav" href="#products">▣ &nbsp; Sản phẩm</a>
+    <a class="nav" href="#stats">▤ &nbsp; Thống kê</a>
+    <a class="nav" href="http://localhost:3000" target="_blank" rel="noopener">◉ &nbsp; Giám sát</a>
+    <div class="side-note">POS PRO<br>Hệ thống quản lý bán hàng<br><br>● Máy chủ đang hoạt động</div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div>
+        <h1>Quản lý bán hàng</h1>
+        <div class="subtitle">Xin chào! Chúc bạn một ngày bán hàng hiệu quả.</div>
+      </div>
+      <div class="avatar">POS / Admin</div>
+    </header>
+
+    <section class="stats" id="stats">
+      <div class="stat"><span class="stat-icon">💰</span><div class="stat-label">Tổng doanh thu</div><div class="stat-value" id="revenue">0 ₫</div></div>
+      <div class="stat"><span class="stat-icon">🧾</span><div class="stat-label">Đơn hàng đã bán</div><div class="stat-value" id="orders">0</div></div>
+      <div class="stat"><span class="stat-icon">📦</span><div class="stat-label">Sản phẩm sắp hết</div><div class="stat-value" id="lowStock">{{ low_stock }}</div></div>
+    </section>
+
+    <section class="content">
+      <div class="panel" id="products">
+        <div class="panel-title">Danh sách sản phẩm</div>
+        <input id="search" class="search" placeholder="🔎  Tìm tên sản phẩm..." oninput="renderProducts()">
+        <div class="categories">
+          <button class="cat active" onclick="setCategory('Tất cả',this)">Tất cả</button>
+          <button class="cat" onclick="setCategory('Đồ uống',this)">Đồ uống</button>
+          <button class="cat" onclick="setCategory('Đồ ăn',this)">Đồ ăn</button>
+          <button class="cat" onclick="setCategory('Khác',this)">Khác</button>
+        </div>
+        <div class="products" id="productList"></div>
+        <div class="section-bottom">
+          <div class="panel-title">Thêm sản phẩm mới</div>
+          <form action="/product/add" method="post">
+            <input class="search" name="name" placeholder="Tên sản phẩm" required>
+            <input class="search" name="category" placeholder="Danh mục (Đồ uống, Đồ ăn...)">
+            <input class="search" name="price" type="number" min="0" placeholder="Giá bán (VNĐ)" required>
+            <input class="search" name="stock" type="number" min="0" placeholder="Số lượng tồn kho" required>
+            <button class="checkout" type="submit">＋ Thêm sản phẩm</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">🛒 Giỏ hàng hiện tại</div>
+        <div id="cartList"><div class="empty">Chưa có sản phẩm trong giỏ</div></div>
+        <div class="total-row"><span>Tạm tính</span><strong id="subtotal">0 ₫</strong></div>
+        <div class="total-row"><span>Thuế</span><span>0 ₫</span></div>
+        <div class="total-row grand"><span>Tổng cộng</span><span id="grandTotal">0 ₫</span></div>
+        <button class="checkout" id="payButton" onclick="checkout()" disabled>Thanh toán đơn hàng →</button>
+        <div class="small">Đơn hàng sẽ được lưu vào cơ sở dữ liệu.</div>
+        <div id="message" class="small"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+let products = [];
+let cart = {};
+let category = "Tất cả";
+
+const money = n => new Intl.NumberFormat("vi-VN").format(n) + " ₫";
+const icons = {"Cà phê đen":"☕","Cà phê sữa":"🥤","Trà đào":"🍑","Trà sữa":"🧋","Bánh mì":"🥖","Bánh ngọt":"🍰","Nước suối":"💧","Sinh tố xoài":"🥭"};
+
+function setCategory(value, button) {
+  category = value;
+  document.querySelectorAll(".cat").forEach(b => b.classList.remove("active"));
+  button.classList.add("active");
+  renderProducts();
+}
+
+async function loadProducts() {
+  const response = await fetch("/api/products");
+  products = await response.json();
+  for (const id of Object.keys(cart)) {
+    const p = products.find(x => x.id === Number(id));
+    if (!p || p.stock < 1) delete cart[id];
+    else cart[id] = Math.min(cart[id], p.stock);
+  }
+  renderProducts();
+  renderCart();
+}
+
+function renderProducts() {
+  const query = document.getElementById("search").value.toLowerCase();
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(query) &&
+    (category === "Tất cả" || p.category === category)
+  );
+  document.getElementById("productList").innerHTML = filtered.map(p => `
+    <div class="product">
+      <div class="product-icon">${icons[p.name] || "🛍️"}</div>
+      <div class="product-name">${escapeHtml(p.name)}</div>
+      <div class="product-meta">${escapeHtml(p.category)} · Còn ${p.stock}</div>
+      <div class="product-bottom">
+        <span class="price">${money(p.price)}</span>
+        <button class="add" onclick="addToCart(${p.id})" ${p.stock < 1 || (cart[p.id] || 0) >= p.stock ? "disabled" : ""}>+</button>
+      </div>
+    </div>`).join("") || '<div class="empty">Không tìm thấy sản phẩm</div>';
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[c]));
+}
+
+function addToCart(id) {
+  const p = products.find(x => x.id === id);
+  if (p && (cart[id] || 0) < p.stock) cart[id] = (cart[id] || 0) + 1;
+  renderProducts();
+  renderCart();
+}
+
+function changeQty(id, delta) {
+  const p = products.find(x => x.id === id);
+  cart[id] = (cart[id] || 0) + delta;
+  if (cart[id] <= 0) delete cart[id];
+  else if (p) cart[id] = Math.min(cart[id], p.stock);
+  renderProducts();
+  renderCart();
+}
+
+function renderCart() {
+  const items = Object.entries(cart).map(([id, qty]) => ({
+    product: products.find(p => p.id === Number(id)), qty
+  })).filter(x => x.product);
+  document.getElementById("cartList").innerHTML = items.length ? items.map(({product:p,qty}) => `
+    <div class="cart-line">
+      <div>
+        <div class="cart-name">${escapeHtml(p.name)}</div>
+        <div class="cart-price">${money(p.price)} / sản phẩm</div>
+        <div class="qty">
+          <button onclick="changeQty(${p.id},-1)">−</button><span>${qty}</span>
+          <button onclick="changeQty(${p.id},1)" ${qty >= p.stock ? "disabled" : ""}>+</button>
+        </div>
+      </div>
+      <div class="line-total">${money(p.price * qty)}</div>
+    </div>`).join("") : '<div class="empty">Chưa có sản phẩm trong giỏ</div>';
+  const total = items.reduce((sum, x) => sum + x.product.price * x.qty, 0);
+  document.getElementById("subtotal").textContent = money(total);
+  document.getElementById("grandTotal").textContent = money(total);
+  document.getElementById("payButton").disabled = !items.length;
+}
+
+async function checkout() {
+  const button = document.getElementById("payButton");
+  const message = document.getElementById("message");
+  button.disabled = true;
+  message.textContent = "Đang xử lý...";
+  try {
+    const response = await fetch("/checkout", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"}
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Thanh toán thất bại");
+    cart = {};
+    message.textContent = `Đã thanh toán hóa đơn #${result.order_id} · ${money(result.total)}`;
+    await loadProducts();
+    await loadStats();
+  } catch (error) {
+    message.textContent = error.message;
+  } finally {
+    button.disabled = !Object.keys(cart).length;
+  }
+}
+
+async function loadStats() {
+  const response = await fetch("/api/stats");
+  const stats = await response.json();
+  document.getElementById("revenue").textContent = money(stats.revenue);
+  document.getElementById("orders").textContent = stats.orders;
+}
+loadProducts();
+loadStats();
+</script>
+</body>
+</html>
